@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens (see DESIGN.md). Tailwind v4 turns each --color-* variable
+ * into utilities such as bg-mask, text-silk and border-trace.
+ */
+@theme {
+  --color-mask: #0f1b26;
+  --color-mask-raised: #152433;
+  --color-trace: #2a3f52;
+  --color-silk: #e9e7e1;
+  --color-silk-dim: #93a1ae;
+  --color-gold: #d9b86c;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background-color: var(--color-mask);
+  color: var(--color-silk);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem; /* 17px body size */
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Headings use Archivo's width axis: condensed and heavy, like a datasheet title. */
+.display {
+  font-stretch: 75%;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+}
+
+.heading {
+  font-stretch: 85%;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+/* One visible focus style everywhere. */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-mask);
+}
+
+/* A placeholder is deliberately loud so it can't reach the live site unnoticed. */
+.placeholder {
+  outline: 1px dashed var(--color-gold);
+  outline-offset: 2px;
+  color: var(--color-gold);
+  padding-inline: 0.25rem;
+}
+
+/*
+ * The one orchestrated motion: pins light up in sequence on load.
+ * --i is set per pin in the component. Disabled for reduced-motion users below.
+ */
+@keyframes pin-power {
+  from {
+    background-color: var(--color-trace);
+  }
+  to {
+    background-color: var(--color-gold);
+  }
+}
+
+@keyframes pin-settle {
+  from {
+    background-color: var(--color-gold);
+  }
+  to {
+    background-color: var(--color-trace);
+  }
+}
+
+.pin-leg {
+  background-color: var(--color-trace);
+  animation:
+    pin-power 160ms ease-out calc(var(--i, 0) * 70ms + 300ms) both,
+    pin-settle 500ms ease-in calc(var(--i, 0) * 70ms + 460ms) forwards;
+}
+
+[aria-pressed="true"] .pin-leg,
+.pin-active .pin-leg {
+  animation: none;
+  background-color: var(--color-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .pin-leg {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
