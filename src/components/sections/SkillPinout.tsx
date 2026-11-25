@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { splitDip, type Pin } from "@/lib/skills";
+import { describeUsage, splitDip, type Pin, type ProjectInfo } from "@/lib/skills";
 
 interface SkillPinoutProps {
   pins: Pin[];
   /** slug -> name and status, so the readout can name projects and describe them truthfully. */
-  projectInfo: Record<string, { name: string; status: string }>;
+  projectInfo: ProjectInfo;
 }
 
 /**
@@ -21,10 +21,7 @@ export function SkillPinout({ pins, projectInfo }: SkillPinoutProps) {
 
   if (!current) return null;
 
-  const linked = current.skill.usedIn.map((slug) => projectInfo[slug]).filter((p) => p !== undefined);
-  const names = linked.map((p) => p.name).join(", ");
-  // Only claim "used in" once every linked project is complete. Otherwise say "planned".
-  const verb = linked.every((p) => p.status === "complete") ? "Used in" : "Planned for";
+  const usage = describeUsage(current.skill.usedIn, projectInfo);
 
   function renderPin(pin: Pin, side: "left" | "right", index: number) {
     const active = pin.number === selected;
@@ -79,11 +76,11 @@ export function SkillPinout({ pins, projectInfo }: SkillPinoutProps) {
       >
         <p className="text-gold heading text-lg">{current.skill.name}</p>
         <p className="text-silk-dim text-sm">{current.category}</p>
-        <p className="text-silk mt-2">
-          {linked.length > 0
-            ? `${verb}: ${names}.`
-            : "No project on this site uses it yet."}
-        </p>
+        {usage.map((line) => (
+          <p key={line} className="text-silk mt-2">
+            {line}
+          </p>
+        ))}
       </figcaption>
     </figure>
   );

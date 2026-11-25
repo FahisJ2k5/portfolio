@@ -2,12 +2,117 @@ import type { Project } from "../lib/types.ts";
 import { todo } from "../lib/placeholder.ts";
 
 /**
- * Project descriptions say what each project is DESIGNED to do.
- * `status` is the truth about how far it has got. Nothing is marked
- * "complete" until the code exists and its tests have passed.
+ * Each project says what it DOES (if built) or is DESIGNED to do (if planned).
+ * `status` is the truth about how far it has got:
+ *   - "complete": the code is pushed, its tests pass, and GitHub's checks are green.
+ *   - "planned": nothing has been written yet.
+ * `verification` lists only checks that were really run. `notYetVerified` is just as important:
+ * it names what exists in the code but has not been tested for real.
  * No usage numbers, performance figures or user counts appear anywhere.
  */
 export const projects: Project[] = [
+  {
+    slug: "billing-engine",
+    name: "Utility Billing Engine",
+    repoName: "billing-engine",
+    tagline: "Turns meter readings and mid-cycle events into an itemised bill, using exact decimal arithmetic.",
+    problem:
+      "A bill is more than usage times rate. Meters get replaced mid-cycle, counters roll over, tariffs change, " +
+      "and fixed charges must be prorated by day. Rounding mistakes change what customers pay.",
+    features: [
+      "JSON input and JSON invoice output, with one line item per tier and charge as an audit trail",
+      "Billing period split at every meter replacement and every tariff change",
+      "Meter register rollover, tiered energy rates scaled for part-period segments, and daily fixed charges prorated by day",
+      "Credits and fees marked taxable or not, plus a tax rate",
+      "Strict validation: unknown fields, wrong types and JSON floats are rejected with an error code that names the field",
+      "Five sample datasets, each with an invoice worked out by hand",
+    ],
+    stack: [
+      { name: "Python 3.10+, standard library only", reason: "No dependencies to install or trust." },
+      { name: "decimal.Decimal", reason: "Floats cannot represent money exactly; 0.1 + 0.2 is not 0.3." },
+      { name: "Frozen dataclasses", reason: "Immutable data, so each calculation stage is easy to test alone." },
+      { name: "unittest, ruff and mypy", reason: "Tests run anywhere; lint and strict type checks run in CI." },
+    ],
+    flow: ["input.json", "Validation", "Split into segments", "Price each segment", "Adjust, tax and round", "invoice.json"],
+    decisions: [
+      {
+        title: "One rounding policy, in one place",
+        detail: "Each money line is rounded once to cents. Nothing else rounds, so a bill can be reproduced by hand.",
+      },
+      {
+        title: "Even use within each meter's time in service",
+        detail:
+          "With only start and end readings, the engine cannot know which days energy was used, so it spreads usage evenly. The README states this limit.",
+      },
+      {
+        title: "Synthetic data only",
+        detail: "Every tariff, reading and customer in the repository is invented for the examples.",
+      },
+    ],
+    verification: [
+      "83 unit tests pass on Python 3.10 and 3.14.",
+      "ruff, ruff format and strict mypy are clean.",
+      "GitHub Actions passes on Python 3.10, 3.11 and 3.12.",
+      "Six deliberate bugs were introduced one at a time, and the tests caught all six.",
+    ],
+    notYetVerified: [
+      "It has not been compared with a real utility's billing system. The sample data is invented.",
+    ],
+    status: "complete",
+    repoUrl: "https://github.com/FahisJ2k5/billing-engine",
+  },
+  {
+    slug: "ai-log-analyzer",
+    name: "AI-Powered Log Analyzer",
+    repoName: "ai-log-analyzer",
+    tagline: "A command-line tool that reads mixed-format logs, groups and classifies errors, and can explain an error group with an LLM.",
+    problem:
+      "When something breaks, engineers scroll through thousands of log lines in different formats, and the same failure " +
+      "repeats with different ids and numbers. This tool turns logs into one structure, collapses repeats into groups, " +
+      "and explains a group on request.",
+    features: [
+      "Four log formats: Python logging text, JSON lines, syslog and web-server access logs",
+      "Stack traces stay attached to the line that caused them",
+      "Repeated errors collapse into groups by masking ids, addresses, numbers and paths",
+      "Rule-based classification: timeout, database, network, authentication, out of memory, disk and more",
+      "Full-text search combined with filters for level, source, category and time range",
+      "Optional AI explanations through Anthropic Claude, with credentials, tokens, emails and IP addresses masked first",
+      "API key read only from the environment; the tool works without one",
+    ],
+    stack: [
+      { name: "Python 3.10+, standard library only", reason: "No SDK or dependency to trust. The model call is one HTTPS request." },
+      { name: "SQLite with FTS5", reason: "Full-text search and indexes with no server to run." },
+      { name: "Anthropic API behind a provider interface", reason: "A fake provider keeps tests offline and a second provider can be added." },
+      { name: "unittest, ruff and mypy", reason: "Tests need no network and no key." },
+    ],
+    flow: ["Raw log lines", "Parse", "Group and classify", "SQLite search", "Redact", "Explain with an LLM"],
+    decisions: [
+      {
+        title: "Rules first, AI second",
+        detail: "Parsing, grouping, classification and search are deterministic and tested. The model only explains.",
+      },
+      {
+        title: "Redact, then truncate",
+        detail: "Cutting first could split a secret in half and send part of it, so masking always runs before the size limit.",
+      },
+      {
+        title: "The model name is not built in",
+        detail: "Model names change. ANTHROPIC_MODEL must be set, and a missing value is a clear error.",
+      },
+    ],
+    verification: [
+      "128 unit tests pass on Python 3.10 and 3.14.",
+      "ruff, ruff format and strict mypy are clean.",
+      "GitHub Actions passes on Python 3.10, 3.11 and 3.12.",
+      "Ten deliberate bugs were introduced one at a time, and the tests caught all ten.",
+    ],
+    notYetVerified: [
+      "No real call to the Anthropic API has been made. The request is tested against a fake transport only.",
+      "It is a command-line tool. There is no web API or web interface yet.",
+    ],
+    status: "complete",
+    repoUrl: "https://github.com/FahisJ2k5/ai-log-analyzer",
+  },
   {
     slug: "iot-device-monitor",
     name: "IoT Device Monitoring Platform",
@@ -41,42 +146,8 @@ export const projects: Project[] = [
         detail: "People log in with JWTs. Machines use long random keys, stored as hashes like passwords.",
       },
     ],
-    status: "planned",
-    repoUrl: todo("repository URL, once pushed"),
-  },
-  {
-    slug: "ai-log-analyzer",
-    name: "AI-Powered Log Analyzer",
-    repoName: "ai-log-analyzer",
-    tagline: "Reads mixed-format logs, groups and classifies errors, and can explain an error group with an LLM.",
-    problem:
-      "When something breaks, engineers scroll through thousands of log lines in different formats. " +
-      "This tool turns logs into one structure, groups repeated errors, and explains them on request.",
-    features: [
-      "Parsers for several log formats feeding one normalised entry type",
-      "Error grouping by fingerprint and rule-based classification",
-      "Full-text search and filters by level, source and time",
-      "Optional AI explanations through Anthropic Claude, with sensitive values redacted first",
-      "Runs fully without an API key; the key is read only from the environment",
-      "Unit tests that never need the network",
-    ],
-    stack: [
-      { name: "Python and FastAPI", reason: "REST API plus a small command-line interface." },
-      { name: "SQLite with FTS5", reason: "Full-text search with no server to run." },
-      { name: "Anthropic API", reason: "Plain-English explanations, behind a provider interface." },
-      { name: "pytest", reason: "Fake providers keep tests offline and deterministic." },
-    ],
-    flow: ["Raw log lines", "Parser", "Fingerprint and classify", "SQLite search", "Redact then explain"],
-    decisions: [
-      {
-        title: "Rules first, AI second",
-        detail: "Parsing, grouping and classification are deterministic and testable. The LLM only explains.",
-      },
-      {
-        title: "Redact before sending",
-        detail: "Emails, IP addresses and token-like values are masked before any text leaves the machine.",
-      },
-    ],
+    verification: [],
+    notYetVerified: ["Nothing has been written yet. This describes the design."],
     status: "planned",
     repoUrl: todo("repository URL, once pushed"),
   },
@@ -93,7 +164,7 @@ export const projects: Project[] = [
       "Single-column PDF with selectable text, built with ReportLab",
       "Analysis against a job description: keyword coverage, missing sections, weak bullet wording",
       "Terminal interface built with Typer and Rich",
-      "Clear note that the analysis is a heuristic checklist, not a copy of any vendor's system",
+      "A clear note that the analysis is a heuristic checklist, not a copy of any vendor's system",
     ],
     stack: [
       { name: "Typer and Rich", reason: "Readable commands and tables in the terminal." },
@@ -108,41 +179,8 @@ export const projects: Project[] = [
         detail: "Models and services are separate from the CLI, so they can be tested without a terminal.",
       },
     ],
-    status: "planned",
-    repoUrl: todo("repository URL, once pushed"),
-  },
-  {
-    slug: "billing-engine",
-    name: "Utility Billing Engine",
-    repoName: "billing-engine",
-    tagline: "Turns meter readings and mid-cycle events into an itemised bill, using exact decimal arithmetic.",
-    problem:
-      "A bill is more than usage times rate. Meters get replaced mid-cycle, counters roll over, tariffs change, " +
-      "and fixed charges must be prorated by day. Rounding mistakes change what customers pay.",
-    features: [
-      "JSON input and JSON invoice output with a line-by-line audit trail",
-      "Billing period split at every meter or tariff event",
-      "Proration of daily charges, tiered rates and adjustments",
-      "Validation with typed exceptions and structured error output",
-      "Sample datasets with hand-checked expected invoices",
-      "Unit tests, plus property-based tests for invariants such as total consumption",
-    ],
-    stack: [
-      { name: "Python Decimal", reason: "Floats cannot represent money exactly." },
-      { name: "Pydantic", reason: "Strict input validation before any calculation." },
-      { name: "pytest and Hypothesis", reason: "Example-based and property-based tests." },
-    ],
-    flow: ["input.json", "Validation", "Split into segments", "Price each segment", "Adjust and round", "invoice.json"],
-    decisions: [
-      {
-        title: "Decimal everywhere, with one rounding policy",
-        detail: "Rounding happens per line item in one place, so results can be reproduced by hand.",
-      },
-      {
-        title: "Synthetic data only",
-        detail: "All tariffs and readings in the repository are made up for the examples.",
-      },
-    ],
+    verification: [],
+    notYetVerified: ["Nothing has been written yet. This describes the design."],
     status: "planned",
     repoUrl: todo("repository URL, once pushed"),
   },

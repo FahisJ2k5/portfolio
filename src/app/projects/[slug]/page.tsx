@@ -101,6 +101,24 @@ export default async function ProjectPage({ params }: Props) {
             </div>
           ))}
         </div>
+
+        <h2 className="heading text-2xl md:text-[1.6rem]">Checked so far</h2>
+        {project.verification.length > 0 ? (
+          <ul className="max-w-[40rem] list-disc space-y-2 pl-5 marker:text-gold">
+            {project.verification.map((v) => (
+              <li key={v}>{v}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-silk-dim max-w-[40rem]">Nothing has been run yet.</p>
+        )}
+
+        <h2 className="heading text-2xl md:text-[1.6rem]">Not checked yet</h2>
+        <ul className="max-w-[40rem] list-disc space-y-2 pl-5 marker:text-gold">
+          {project.notYetVerified.map((n) => (
+            <li key={n}>{n}</li>
+          ))}
+        </ul>
       </div>
     </article>
   );

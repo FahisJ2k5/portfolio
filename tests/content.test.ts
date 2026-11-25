@@ -21,12 +21,44 @@ describe("placeholder helpers", () => {
 });
 
 describe("content integrity", () => {
-  it("has unique project slugs and no invented completion", () => {
+  it("has unique project slugs", () => {
     const slugs = projects.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     expect(projects).toHaveLength(4);
-    // Raise this deliberately, per project, once its code and tests have passed.
-    for (const project of projects) expect(project.status).not.toBe("complete");
+  });
+
+  it("only marks a project complete when it has a real repository and recorded checks", () => {
+    for (const project of projects) {
+      if (project.status === "complete") {
+        expect(isTodo(project.repoUrl)).toBe(false);
+        expect(project.repoUrl).toMatch(/^https:\/\/github\.com\/FahisJ2k5\/[\w.-]+$/);
+        expect(project.verification.length).toBeGreaterThan(0);
+        expect(project.verification.join(" ")).toMatch(/GitHub Actions/);
+      } else {
+        // A project that is not finished must not list checks that were never run.
+        expect(project.verification).toHaveLength(0);
+      }
+      // Every project says what has NOT been verified, so a gap is never silently hidden.
+      expect(project.notYetVerified.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("completed projects are the ones that actually exist", () => {
+    const complete = projects.filter((p) => p.status === "complete").map((p) => p.slug);
+    expect(complete.sort()).toEqual(["ai-log-analyzer", "billing-engine"]);
+  });
+
+  it("does not claim a web API for the command-line log analyzer", () => {
+    const analyzer = getProject("ai-log-analyzer");
+    const text = JSON.stringify(analyzer).toLowerCase();
+    expect(text).not.toContain("fastapi");
+    expect(text).not.toContain("rest api");
+  });
+
+  it("does not name libraries the billing engine does not use", () => {
+    const text = JSON.stringify(getProject("billing-engine")).toLowerCase();
+    expect(text).not.toContain("pydantic");
+    expect(text).not.toContain("hypothesis");
   });
 
   it("every project has the fields a case-study page needs", () => {
@@ -51,6 +83,7 @@ describe("content integrity", () => {
 
   it("does not invent certifications, and keeps unknown details as placeholders", () => {
     expect(certifications).toHaveLength(0);
+    expect(profile.links.githubUsername).toBe("FahisJ2k5");
     expect(isTodo(profile.links.email)).toBe(true);
     expect(isTodo(experience[0]?.organisation)).toBe(true);
     expect(isTodo(education[0]?.institution)).toBe(true);

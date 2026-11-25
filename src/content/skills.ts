@@ -19,7 +19,7 @@ export const skillGroups: SkillGroup[] = [
   {
     category: "Backend and data",
     skills: [
-      { name: "REST APIs and HTTP", short: "REST", usedIn: ["iot-device-monitor", "ai-log-analyzer"] },
+      { name: "REST APIs and HTTP", short: "REST", usedIn: ["iot-device-monitor", "ai-log-analyzer"] }, // log analyzer: one outbound HTTPS call to the model API
       { name: "MySQL", usedIn: [] },
     ],
   },
@@ -28,7 +28,7 @@ export const skillGroups: SkillGroup[] = [
     skills: [
       { name: "Linux and Unix", short: "Linux", usedIn: [] },
       { name: "Git and GitHub", short: "Git", usedIn: ["iot-device-monitor", "ai-log-analyzer", "resumeforge", "billing-engine"] },
-      { name: "Docker (fundamentals)", short: "Docker", usedIn: ["iot-device-monitor", "ai-log-analyzer"] },
+      { name: "Docker (fundamentals)", short: "Docker", usedIn: ["iot-device-monitor"] },
       { name: "AWS (fundamentals)", short: "AWS", usedIn: [] },
     ],
   },

@@ -18,6 +18,25 @@ export function toPins(groups: SkillGroup[]): Pin[] {
   return pins;
 }
 
+export type ProjectInfo = Record<string, { name: string; status: string }>;
+
+/**
+ * The sentences shown under a pin: which projects use the skill.
+ * "Used in" is only said about projects that are complete; anything else is "Planned for",
+ * so the page never claims a skill was used in work that has not been finished.
+ */
+export function describeUsage(usedIn: readonly string[], projects: ProjectInfo): string[] {
+  const linked = usedIn.map((slug) => projects[slug]).filter((p) => p !== undefined);
+  const done = linked.filter((p) => p.status === "complete").map((p) => p.name);
+  const planned = linked.filter((p) => p.status !== "complete").map((p) => p.name);
+
+  const lines: string[] = [];
+  if (done.length > 0) lines.push(`Used in: ${done.join(", ")}.`);
+  if (planned.length > 0) lines.push(`Planned for: ${planned.join(", ")}.`);
+  if (lines.length === 0) lines.push("No project on this site uses it yet.");
+  return lines;
+}
+
 /**
  * Splits pins into the two sides of a dual in-line package.
  * Left side runs top to bottom (1..half). The right side runs bottom to top

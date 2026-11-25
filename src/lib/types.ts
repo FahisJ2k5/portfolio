@@ -68,6 +68,10 @@ export interface Project {
   /** Ordered stages data passes through. */
   flow: string[];
   decisions: Decision[];
+  /** Checks that have really been run, each written as one plain statement. Empty until something has. */
+  verification: string[];
+  /** Things that exist in the code but have not been tested for real yet. */
+  notYetVerified: string[];
   status: ProjectStatus;
   /** Repository URL, or a todo() placeholder until it's pushed. */
   repoUrl: string;

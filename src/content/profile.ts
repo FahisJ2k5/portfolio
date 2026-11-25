@@ -26,9 +26,9 @@ export const profile: Profile = {
   targetRoles: ["Software Engineer", "Backend Developer", "AI Engineer"],
   links: {
     email: todo("professional email address"),
-    githubUsername: todo("GitHub username"),
+    githubUsername: "FahisJ2k5",
     linkedin: todo("LinkedIn profile URL"),
-    portfolioRepo: todo("portfolio repository URL"),
+    portfolioRepo: "https://github.com/FahisJ2k5/portfolio",
   },
   resume: {
     href: "/resume/fahis-jabbar-resume.pdf",

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fetchPublicRepos, isValidGithubUsername, parseRepos } from "../src/lib/github";
-import { splitDip, toPins } from "../src/lib/skills";
+import { describeUsage, splitDip, toPins } from "../src/lib/skills";
 import { skillGroups } from "../src/content/skills";
 
 function fakeFetch(status: number, body: unknown): typeof fetch {
@@ -59,6 +59,31 @@ describe("fetchPublicRepos", () => {
     const body = [1, 2, 3].map((n) => ({ name: `r${n}`, html_url: `u${n}`, pushed_at: `2026-0${n}-01T00:00:00Z` }));
     const result = await fetchPublicRepos("octocat", { fetchImpl: fakeFetch(200, body), limit: 2 });
     expect(result.ok && result.repos.map((r) => r.name)).toEqual(["r3", "r2"]);
+  });
+});
+
+describe("describeUsage", () => {
+  const info = {
+    done: { name: "Finished One", status: "complete" },
+    todo: { name: "Planned One", status: "planned" },
+    wip: { name: "Started One", status: "in-progress" },
+  };
+
+  it("says 'Used in' only for complete projects", () => {
+    expect(describeUsage(["done"], info)).toEqual(["Used in: Finished One."]);
+  });
+
+  it("says 'Planned for' for anything not complete", () => {
+    expect(describeUsage(["todo", "wip"], info)).toEqual(["Planned for: Planned One, Started One."]);
+  });
+
+  it("separates finished from planned work instead of blurring them", () => {
+    expect(describeUsage(["done", "todo"], info)).toEqual(["Used in: Finished One.", "Planned for: Planned One."]);
+  });
+
+  it("is honest when no project uses the skill, and ignores unknown slugs", () => {
+    expect(describeUsage([], info)).toEqual(["No project on this site uses it yet."]);
+    expect(describeUsage(["ghost"], info)).toEqual(["No project on this site uses it yet."]);
   });
 });
 
