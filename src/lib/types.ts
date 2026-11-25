@@ -33,6 +33,8 @@ export interface Skill {
   short?: string;
   /** Slugs of projects in this portfolio that use the skill. */
   usedIn: string[];
+  /** Short true statements from the resume about where the skill was used. Shown under the pin. */
+  evidence?: string[];
 }
 
 export interface SkillGroup {

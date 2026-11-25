@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo } from "next/font/google";
 import "./globals.css";
+import { Dock } from "@/components/layout/Dock";
 import { Footer } from "@/components/layout/Footer";
-import { Nav } from "@/components/layout/Nav";
+import { Rail } from "@/components/layout/Rail";
 import { profile } from "@/content/profile";
 import { siteUrl } from "@/lib/site";
 
@@ -45,9 +46,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <Nav />
-        <main id="main">{children}</main>
-        <Footer />
+        <Rail />
+        {/* On wide screens the rail occupies the left edge; the page is shifted right to make room. */}
+        <div className="lg:pl-20">
+          <main id="main">{children}</main>
+          <Footer />
+        </div>
+        {/* Extra room at the bottom so the floating dock never covers the last lines on a phone. */}
+        <div aria-hidden className="h-20 lg:hidden" />
+        <Dock />
       </body>
     </html>
   );

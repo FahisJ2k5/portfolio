@@ -99,11 +99,48 @@ body {
   background-color: var(--color-gold);
 }
 
+/*
+ * A faint dot grid behind the hero, like the pad grid of a prototyping board. It sits on a
+ * pseudo-element so the fade-out mask never touches the hero's real content.
+ */
+.hero-backdrop {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgb(147 161 174 / 0.2) 1px, transparent 0);
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 35%, transparent 95%);
+}
+
+/* The "Open to roles" dot gives off a slow ring. It is purely decorative and stops for reduced motion. */
+@keyframes status-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgb(217 184 108 / 0.5);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 7px rgb(217 184 108 / 0);
+  }
+}
+
+.status-dot {
+  animation: status-ring 2.4s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .pin-leg {
+  .pin-leg,
+  .status-dot {
     animation: none;
   }
   *,

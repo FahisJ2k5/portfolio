@@ -1,5 +1,7 @@
 import type { Skill, SkillGroup } from "./types.ts";
 
+export const NO_USAGE = "On my skills list. No project or role on this site uses it yet.";
+
 export interface Pin {
   /** Pin numbers run 1..n like a real chip. */
   number: number;
@@ -21,7 +23,7 @@ export function toPins(groups: SkillGroup[]): Pin[] {
 export type ProjectInfo = Record<string, { name: string; status: string }>;
 
 /**
- * The sentences shown under a pin: which projects use the skill.
+ * The project lines shown under a pin: which projects use the skill. Empty if none do.
  * "Used in" is only said about projects that are complete; anything else is "Planned for",
  * so the page never claims a skill was used in work that has not been finished.
  */
@@ -33,8 +35,16 @@ export function describeUsage(usedIn: readonly string[], projects: ProjectInfo):
   const lines: string[] = [];
   if (done.length > 0) lines.push(`Used in: ${done.join(", ")}.`);
   if (planned.length > 0) lines.push(`Planned for: ${planned.join(", ")}.`);
-  if (lines.length === 0) lines.push("No project on this site uses it yet.");
   return lines;
+}
+
+/**
+ * Everything shown under a pin: project usage first, then evidence from the resume.
+ * If there is neither, say so plainly rather than leaving the card blank.
+ */
+export function describeSkill(skill: Skill, projects: ProjectInfo): string[] {
+  const lines = [...describeUsage(skill.usedIn, projects), ...(skill.evidence ?? [])];
+  return lines.length > 0 ? lines : [NO_USAGE];
 }
 
 /**

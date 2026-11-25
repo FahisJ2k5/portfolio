@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { fetchPublicRepos, isValidGithubUsername, parseRepos } from "../src/lib/github";
-import { describeUsage, splitDip, toPins } from "../src/lib/skills";
+import { NO_USAGE, describeSkill, describeUsage, splitDip, toPins } from "../src/lib/skills";
+import { projects } from "../src/content/projects";
 import { skillGroups } from "../src/content/skills";
 
 function fakeFetch(status: number, body: unknown): typeof fetch {
@@ -81,9 +82,34 @@ describe("describeUsage", () => {
     expect(describeUsage(["done", "todo"], info)).toEqual(["Used in: Finished One.", "Planned for: Planned One."]);
   });
 
-  it("is honest when no project uses the skill, and ignores unknown slugs", () => {
-    expect(describeUsage([], info)).toEqual(["No project on this site uses it yet."]);
-    expect(describeUsage(["ghost"], info)).toEqual(["No project on this site uses it yet."]);
+  it("returns nothing when no project uses the skill, and ignores unknown slugs", () => {
+    expect(describeUsage([], info)).toEqual([]);
+    expect(describeUsage(["ghost"], info)).toEqual([]);
+  });
+});
+
+describe("describeSkill", () => {
+  const info = { done: { name: "Finished One", status: "complete" } };
+
+  it("shows project usage first, then evidence from the resume", () => {
+    const skill = { name: "X", usedIn: ["done"], evidence: ["Used at work."] };
+    expect(describeSkill(skill, info)).toEqual(["Used in: Finished One.", "Used at work."]);
+  });
+
+  it("shows evidence alone when no project uses the skill", () => {
+    expect(describeSkill({ name: "X", usedIn: [], evidence: ["Used at work."] }, info)).toEqual(["Used at work."]);
+  });
+
+  it("never leaves a card blank", () => {
+    expect(describeSkill({ name: "X", usedIn: [] }, info)).toEqual([NO_USAGE]);
+    expect(describeSkill({ name: "X", usedIn: ["ghost"] }, info)).toEqual([NO_USAGE]);
+  });
+
+  it("gives every pin in the real content something to show", () => {
+    const projectInfo = Object.fromEntries(projects.map((p) => [p.slug, { name: p.name, status: p.status }]));
+    for (const pin of toPins(skillGroups)) {
+      expect(describeSkill(pin.skill, projectInfo).length).toBeGreaterThan(0);
+    }
   });
 });
 

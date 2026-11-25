@@ -121,6 +121,13 @@ describe("content integrity", () => {
     expect(shown).not.toContain("TODO:");
   });
 
+  it("keeps evidence lines to what the resume supports (no invented intensity or ownership)", () => {
+    const evidence = skillGroups.flatMap((g) => g.skills.flatMap((s) => s.evidence ?? [])).join(" ").toLowerCase();
+    for (const banned of ["daily", "expert", "advanced", "years of", "proficient", "mastered", "led a team"]) {
+      expect(evidence).not.toContain(banned);
+    }
+  });
+
   it("only offers a resume download when the file exists", () => {
     expect(profile.resume.available).toBe(true);
     expect(existsSync(new URL(`../public${profile.resume.href}`, import.meta.url))).toBe(true);

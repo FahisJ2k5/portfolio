@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { describeUsage, splitDip, type Pin, type ProjectInfo } from "@/lib/skills";
+import { describeSkill, splitDip, type Pin, type ProjectInfo } from "@/lib/skills";
 
 interface SkillPinoutProps {
   pins: Pin[];
@@ -21,7 +21,7 @@ export function SkillPinout({ pins, projectInfo }: SkillPinoutProps) {
 
   if (!current) return null;
 
-  const usage = describeUsage(current.skill.usedIn, projectInfo);
+  const usage = describeSkill(current.skill, projectInfo);
 
   function renderPin(pin: Pin, side: "left" | "right", index: number) {
     const active = pin.number === selected;
@@ -56,14 +56,31 @@ export function SkillPinout({ pins, projectInfo }: SkillPinoutProps) {
       <div className="grid grid-cols-[1fr_auto_1fr] items-stretch">
         <ul className="flex flex-col justify-around">{left.map((p, i) => renderPin(p, "left", i))}</ul>
 
-        {/* Chip body. The notch and dot mark pin 1, as on a real package. */}
+        {/*
+          Chip body. The notch and dot mark pin 1, as on a real package. From the sm size up it
+          carries a package marking (part label, what it is, where it is from), like printing on an IC.
+          On a phone there is no room for that, so only the part label shows, turned sideways.
+        */}
         <div
           aria-hidden
-          className="bg-mask-raised border-trace relative mx-[-1px] flex w-20 flex-col items-center justify-end border-2 pb-4 sm:w-28"
+          className="bg-mask-raised border-trace relative mx-[-1px] flex w-16 flex-col items-center justify-end border-2 pb-4 sm:w-36 sm:items-start sm:justify-center sm:px-4 sm:py-10"
         >
           <span className="bg-mask border-trace absolute -top-px left-1/2 h-3 w-8 -translate-x-1/2 rounded-b-full border border-t-0" />
           <span className="bg-silk-dim absolute top-5 left-3 h-2 w-2 rounded-full" />
-          <span className="heading text-silk-dim -rotate-90 text-sm whitespace-nowrap">FJ-01</span>
+          <span className="heading text-silk-dim -rotate-90 text-sm whitespace-nowrap sm:hidden">FJ-01</span>
+          <div className="hidden sm:block">
+            <p className="heading text-silk text-xl">FJ-01</p>
+            <p className="text-silk-dim mt-2 text-xs leading-snug">
+              Software engineer
+              <br />
+              Backend and AI
+            </p>
+            <p className="text-silk-dim mt-3 text-xs leading-snug">
+              Bangalore, IN
+              <br />
+              B.Sc. IoT, 2026
+            </p>
+          </div>
         </div>
 
         <ul className="flex flex-col justify-around">{right.map((p, i) => renderPin(p, "right", i))}</ul>
@@ -72,7 +89,7 @@ export function SkillPinout({ pins, projectInfo }: SkillPinoutProps) {
       {/* aria-live announces the change for screen reader users when a pin is selected. */}
       <figcaption
         aria-live="polite"
-        className="border-trace bg-mask-raised mt-6 rounded-sm border p-4 text-[0.95rem]"
+        className="border-trace bg-mask-raised mt-6 min-h-[10.5rem] rounded-sm border p-4 text-[0.95rem]"
       >
         <p className="text-gold heading text-lg">{current.skill.name}</p>
         <p className="text-silk-dim text-sm">{current.category}</p>
