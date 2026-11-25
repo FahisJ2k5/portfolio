@@ -1,4 +1,4 @@
-import { certifications, education } from "@/content/experience";
+import { achievements, certifications, education } from "@/content/experience";
 import { Section } from "@/components/ui/Section";
 import { Value } from "@/components/ui/Placeholder";
 
@@ -37,6 +37,13 @@ export function Education() {
             ))}
           </ul>
         )}
+
+        <h3 className="heading mt-10 text-xl">Achievements and leadership</h3>
+        <ul className="mt-4 list-disc space-y-2 pl-5 marker:text-gold">
+          {achievements.map((a) => (
+            <li key={a}>{a}</li>
+          ))}
+        </ul>
       </div>
     </Section>
   );

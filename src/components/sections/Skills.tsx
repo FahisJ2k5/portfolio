@@ -24,6 +24,9 @@ export function Skills() {
                   {group.skills.map((skill) => (
                     <li key={skill.name}>{skill.name}</li>
                   ))}
+                  {(group.extra ?? []).map((name) => (
+                    <li key={name}>{name}</li>
+                  ))}
                 </ul>
               </td>
             </tr>

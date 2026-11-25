@@ -15,6 +15,7 @@ export const skillGroups: SkillGroup[] = [
       { name: "Embedded C", short: "Emb. C", usedIn: [] },
       { name: "SQL", usedIn: ["iot-device-monitor", "ai-log-analyzer"] },
     ],
+    extra: ["C++", "JavaScript"],
   },
   {
     category: "Backend and data",
@@ -22,6 +23,7 @@ export const skillGroups: SkillGroup[] = [
       { name: "REST APIs and HTTP", short: "REST", usedIn: ["iot-device-monitor", "ai-log-analyzer"] }, // log analyzer: one outbound HTTPS call to the model API
       { name: "MySQL", usedIn: [] },
     ],
+    extra: ["HTML", "CSS", "SQLite with full-text search"],
   },
   {
     category: "Tools and platforms",
@@ -30,6 +32,27 @@ export const skillGroups: SkillGroup[] = [
       { name: "Git and GitHub", short: "Git", usedIn: ["iot-device-monitor", "ai-log-analyzer", "resumeforge", "billing-engine"] },
       { name: "Docker (fundamentals)", short: "Docker", usedIn: ["iot-device-monitor"] },
       { name: "AWS (fundamentals)", short: "AWS", usedIn: [] },
+    ],
+    extra: ["Harbor", "Windows", "PowerShell", "VS Code", "VMware virtualization"],
+  },
+  {
+    category: "Testing and quality",
+    skills: [],
+    extra: ["unittest", "GitHub Actions (CI)", "ruff", "mypy"],
+  },
+  {
+    category: "AI evaluation",
+    skills: [],
+    extra: [
+      "AI response evaluation",
+      "Multimodal response comparison",
+      "Evaluation rubric design",
+      "Prompt design",
+      "Pass@k testing",
+      "Automated scoring",
+      "Data validation",
+      "Adversarial and edge-case testing",
+      "Root-cause analysis",
     ],
   },
   {

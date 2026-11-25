@@ -39,7 +39,10 @@ export interface SkillGroup {
   category: string;
   /** One sentence explaining the group, when the name alone isn't enough. */
   note?: string;
+  /** Skills that become pins on the hero chip. Keep this list short. */
   skills: Skill[];
+  /** More skills for the table only. They do not become pins. */
+  extra?: string[];
 }
 
 export type ProjectStatus = "planned" | "in-progress" | "complete";

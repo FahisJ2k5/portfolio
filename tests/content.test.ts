@@ -1,5 +1,6 @@
+import { existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { certifications, education, experience } from "../src/content/experience";
+import { achievements, certifications, education, experience } from "../src/content/experience";
 import { profile } from "../src/content/profile";
 import { getProject, projects } from "../src/content/projects";
 import { skillGroups } from "../src/content/skills";
@@ -81,13 +82,48 @@ describe("content integrity", () => {
     }
   });
 
-  it("does not invent certifications, and keeps unknown details as placeholders", () => {
-    expect(certifications).toHaveLength(0);
+  it("holds the contact details Fahis supplied", () => {
+    expect(profile.links.email).toBe("fahisjabbar95@gmail.com");
     expect(profile.links.githubUsername).toBe("FahisJ2k5");
-    expect(isTodo(profile.links.email)).toBe(true);
-    expect(isTodo(experience[0]?.organisation)).toBe(true);
-    expect(isTodo(education[0]?.institution)).toBe(true);
-    expect(profile.resume.available).toBe(false);
+    expect(profile.links.linkedin).toBe("https://in.linkedin.com/in/fahis-jabbar-78b562377");
+  });
+
+  it("keeps the phone number off the public site", () => {
+    const everything = JSON.stringify({ profile, projects, experience, education, certifications, achievements });
+    expect(everything).not.toMatch(/9847339879/);
+    expect(everything).not.toMatch(/\+91/);
+  });
+
+  it("matches the experience and education Fahis described", () => {
+    const internship = experience.find((e) => e.organisation === "SMEC Technologies");
+    expect(internship?.period).toBe("2 Jun – 5 Jul 2025");
+    expect(internship?.location).toContain("Kochi");
+    expect(experience.some((e) => e.organisation === "Handshake AI")).toBe(true);
+    expect(education[0]?.institution).toBe("Kristu Jayanti University");
+    expect(education[0]?.degree).toContain("Internet of Things");
+  });
+
+  it("keeps confidential freelance project code names off the public site", () => {
+    const text = JSON.stringify({ profile, experience }).toLowerCase();
+    for (const name of ["dynamo", "octahedron", "draco", "seal india"]) expect(text).not.toContain(name);
+  });
+
+  it("lists exactly the five certifications from the resume, each with an issuer and a year", () => {
+    expect(certifications).toHaveLength(5);
+    for (const c of certifications) {
+      expect(c.issuer.length).toBeGreaterThan(0);
+      expect(c.year).toMatch(/\d{4}/);
+    }
+  });
+
+  it("has no placeholders left in the content shown on the site", () => {
+    const shown = JSON.stringify({ profile, experience, education, certifications, achievements });
+    expect(shown).not.toContain("TODO:");
+  });
+
+  it("only offers a resume download when the file exists", () => {
+    expect(profile.resume.available).toBe(true);
+    expect(existsSync(new URL(`../public${profile.resume.href}`, import.meta.url))).toBe(true);
   });
 
   it("contains no performance or usage claims", () => {
